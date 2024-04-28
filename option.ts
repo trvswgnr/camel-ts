@@ -25,6 +25,16 @@ namespace Option {
     }
 
     /**
+     * `match(o, { Some, None })` is `Some(v)` if `o` is `Some<V>` and `None()` otherwise.
+     */
+    export function match<V, A>(
+        o: Option<V>,
+        { Some: _Some, None: _None }: { Some: (v: V) => A; None: () => A },
+    ): A {
+        return o.type === Some ? _Some(o.v) : _None();
+    }
+
+    /**
      * `none` is `None`.
      */
     export function none<V>(): Option<V> {

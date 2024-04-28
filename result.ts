@@ -24,6 +24,16 @@ namespace Result {
         }
     }
 
+    /**
+     * `match(r, { Ok, Err })` is `Ok(v)` if `r` is `Ok<V>` and `Err(e)` otherwise.
+     */
+    export function match<V, E, A>(
+        r: Result<V, E>,
+        { Ok: _Ok, Err: _Err }: { Ok: (v: V) => A; Err: (e: E) => A },
+    ): A {
+        return r.type === Ok ? _Ok(r.v) : _Err(r.e);
+    }
+
     /* -- Results -- */
 
     /**
