@@ -25,13 +25,10 @@ namespace Option {
     }
 
     /**
-     * `match(o, { Some, None })` is `Some(v)` if `o` is `Some<V>` and `None()` otherwise.
+     * `match(o, cases)` is `cases.Some(v)` if `o` is `Some<V>` and `cases.None()` otherwise.
      */
-    export function match<V, A>(
-        o: Option<V>,
-        { Some: _Some, None: _None }: { Some: (v: V) => A; None: () => A },
-    ): A {
-        return o.type === Some ? _Some(o.v) : _None();
+    export function match<V, A>(o: Option<V>, cases: { Some: (v: V) => A; None: () => A }): A {
+        return o.type === Some ? cases.Some(o.v) : cases.None();
     }
 
     /**

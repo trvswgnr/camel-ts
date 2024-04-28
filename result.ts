@@ -25,13 +25,13 @@ namespace Result {
     }
 
     /**
-     * `match(r, { Ok, Err })` is `Ok(v)` if `r` is `Ok<V>` and `Err(e)` otherwise.
+     * `match(r, cases)` is `cases.Ok(v)` if `r` is `Ok<V>` and `cases.Err(e)` otherwise.
      */
     export function match<V, E, A>(
         r: Result<V, E>,
-        { Ok: _Ok, Err: _Err }: { Ok: (v: V) => A; Err: (e: E) => A },
+        cases: { Ok: (v: V) => A; Err: (e: E) => A },
     ): A {
-        return r.type === Ok ? _Ok(r.v) : _Err(r.e);
+        return r.type === Ok ? cases.Ok(r.v) : cases.Err(r.e);
     }
 
     /* -- Results -- */
