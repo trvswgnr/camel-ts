@@ -16,6 +16,8 @@ For now, you'll have to clone the repository and copy what you need.
 
 ## Documentation
 
+Both `Result` and `Option` contain all of the same functionality as their OCaml counterparts, with a couple additional utility functions. You can reference the OCaml docs for [`Result`](https://v2.ocaml.org/api/Result.html) and [`Option`](https://v2.ocaml.org/api/Option.html) for more information.
+
 ### Result Type
 
 -   **Creation**: Create `Ok` or `Err` types using `Result.ok` and `Result.err`, akin to OCaml's constructors.
