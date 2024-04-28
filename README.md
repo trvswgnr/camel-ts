@@ -31,13 +31,42 @@ For now, you'll have to clone the repository and copy what you need.
 ## Example
 
 ```typescript
-import { Result, Option } from "./path_to_library";
+import { Result, Option } from "./camel-ts";
 
 let v = Result.ok(5);
 let e = Result.err(new Error("Something went wrong"));
 
 let s = Option.some(5);
 let n = Option.none();
+
+function divide(a: number, b: number): Result<number, string> {
+    if (b === 0) {
+        return Result.err("Division by zero");
+    }
+    return Result.ok(a / b);
+}
+```
+
+It also provides two utilities for each that are not found in OCaml: `Result.of`, `Result.match`, `Option.of`, and `Option.match`. They can be used to create and match against results and options, respectively.
+
+```ts
+const resultOfSomethingDangerous = Result.of(() => {
+    return JSON.parse("{invalid json}");
+}); // will be Err<Error>
+
+const value = Result.match(resultOfSomethingDangerous, {
+    Ok: (v) => v,
+    Err: (e) => "Default value",
+});
+
+const map = new Map<string, number>();
+
+const maybeA = Option.of(map.get("a")); // will be None, because map.get("a") returns undefined
+
+const value = Option.match(maybeA, {
+    Some: (v) => v,
+    None: () => "Default value",
+});
 ```
 
 ## Contributing
