@@ -1,5 +1,5 @@
-import { InvalidArgumentError } from "./errors";
-import Result from "./result";
+import { InvalidArgument } from "./errors";
+import Result from "./results";
 
 /**
  * The type for option values. Either `None` or a value `Some<V>`.
@@ -54,11 +54,11 @@ namespace Option {
 
     /**
      * `get(o)` is `v` if `o` is `Some<V>` and throws otherwise.
-     * @throws {InvalidArgumentError} if `o` is `None`.
+     * @throws {InvalidArgument} if `o` is `None`.
      */
     export function get<V>(o: Option<V>): V {
         if (o.type === None) {
-            throw new InvalidArgumentError("tried to get value of None");
+            throw new InvalidArgument("tried to get value of None");
         }
         return o.v;
     }
