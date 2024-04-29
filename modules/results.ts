@@ -7,8 +7,8 @@ import Option from "./options";
 type Result<V, E> = Result.Ok<V> | Result.Error<E>;
 
 namespace Result {
-  export type Ok<V> = { type: typeof Result.Ok; v: V };
-  export type Error<E> = { type: typeof Result.Err; e: E };
+  export type Ok<V> = { t: typeof Result.Ok; v: V };
+  export type Error<E> = { t: typeof Result.Error; e: E };
 
   /**
    * `Ok` is a symbol representing the `Ok` variant of a `Result`.
@@ -18,7 +18,7 @@ namespace Result {
   /**
    * `Err` is a symbol representing the `Err` variant of a `Result`.
    */
-  export const Err = Symbol("Err");
+  export const Error = Symbol("Err");
 
   /**
    * `of(fn)` is `Err<Error>` if `fn` throws and `Ok<V>` otherwise.
@@ -27,7 +27,7 @@ namespace Result {
     try {
       return ok(fn());
     } catch (e) {
-      return err(e);
+      return error(e);
     }
   }
 
@@ -38,7 +38,7 @@ namespace Result {
     r: Result<V, E>,
     cases: { Ok: (v: V) => A; Err: (e: E) => A }
   ): A {
-    return r.type === Ok ? cases.Ok(r.v) : cases.Err(r.e);
+    return r.t === Ok ? cases.Ok(r.v) : cases.Err(r.e);
   }
 
   /* -- Results -- */
@@ -47,21 +47,21 @@ namespace Result {
    * `ok(v)` is `Ok<V>`.
    */
   export function ok<V, E>(v: V): Result<V, E> {
-    return { type: Ok, v };
+    return { t: Ok, v };
   }
 
   /**
    * `err(e)` is `Err<E>`.
    */
-  export function err<V, E>(e: E): Result<V, E> {
-    return { type: Err, e };
+  export function error<V, E>(e: E): Result<V, E> {
+    return { t: Error, e };
   }
 
   /**
    * `value(r, _default)` is `v` if `r` is `Ok`, `_default` otherwise.
    */
   export function value<V, E>(r: Result<V, E>, _default: V): V {
-    return r.type === Ok ? r.v : _default;
+    return r.t === Ok ? r.v : _default;
   }
 
   /**
@@ -69,7 +69,7 @@ namespace Result {
    * @throws {InvalidArgument} if `r` is `Err<E>`.
    */
   export function get_ok<V, E>(r: Result<V, E>): V {
-    if (r.type === Ok) {
+    if (r.t === Ok) {
       return r.v;
     }
     throw new InvalidArgument("tried to get Ok value of Result that is Err");
@@ -80,7 +80,7 @@ namespace Result {
    * @throws {InvalidArgument} if `r` is `Ok<V>`.
    */
   export function get_err<V, E>(r: Result<V, E>): E {
-    if (r.type === Err) {
+    if (r.t === Error) {
       return r.e;
     }
     throw new InvalidArgument("tried to get Err value of Result that is Ok");
@@ -93,21 +93,21 @@ namespace Result {
     r: Result<V, E>,
     f: (v: V) => Result<B, E>
   ): Result<B, E> {
-    return r.type === Ok ? f(r.v) : r;
+    return r.t === Ok ? f(r.v) : r;
   }
 
   /**
    * `join(rr)` is `v` if `rr` is `Ok<Ok<V>>` and `rr` otherwise.
    */
   export function join<V, E>(rr: Result<Result<V, E>, E>): Result<V, E> {
-    return rr.type === Ok ? rr.v : rr;
+    return rr.t === Ok ? rr.v : rr;
   }
 
   /**
    * `map(f, r)` is `Ok<f(v)>` if `r` is `Ok<V>` and `r` otherwise.
    */
   export function map<V, E, B>(f: (v: V) => B, r: Result<V, E>): Result<B, E> {
-    return r.type === Ok ? ok(f(r.v)) : r;
+    return r.t === Ok ? ok(f(r.v)) : r;
   }
 
   /**
@@ -117,7 +117,7 @@ namespace Result {
     f: (e: E) => F,
     r: Result<V, E>
   ): Result<V, F> {
-    return r.type === Err ? err(f(r.e)) : r;
+    return r.t === Error ? error(f(r.e)) : r;
   }
 
   /**
@@ -128,14 +128,14 @@ namespace Result {
     error: (e: E) => C,
     r: Result<V, E>
   ): C {
-    return r.type === Ok ? ok(r.v) : error(r.e);
+    return r.t === Ok ? ok(r.v) : error(r.e);
   }
 
   /**
    * `iter(f, r)` is `f(v)` if `r` is `Ok<V>` and `()` otherwise.
    */
   export function iter<V, E>(f: (v: V) => void, r: Result<V, E>): void {
-    if (r.type === Ok) {
+    if (r.t === Ok) {
       f(r.v);
     }
   }
@@ -144,7 +144,7 @@ namespace Result {
    * `iter_err(f, r)` is `f(e)` if `r` is `Err<E>` and `()` otherwise.
    */
   export function iter_err<V, E>(f: (e: E) => void, r: Result<V, E>): void {
-    if (r.type === Err) {
+    if (r.t === Error) {
       f(r.e);
     }
   }
@@ -155,14 +155,14 @@ namespace Result {
    * `is_ok r` is `true` if and only if `r` is `Ok`.
    */
   export function is_ok<V, E>(r: Result<V, E>): r is Ok<V> {
-    return r.type === Ok;
+    return r.t === Ok;
   }
 
   /**
    * `is_err r` is `true` if and only if `r` is `Err`.
    */
   export function is_err<V, E>(r: Result<V, E>): r is Error<E> {
-    return r.type === Err;
+    return r.t === Error;
   }
 
   /**
@@ -174,11 +174,11 @@ namespace Result {
     r0: Result<V, E>,
     r1: Result<V, E>
   ): boolean {
-    if (r0.type === Ok && r1.type === Ok) {
+    if (r0.t === Ok && r1.t === Ok) {
       return ok(r0.v, r1.v);
     }
 
-    if (r0.type === Err && r1.type === Err) {
+    if (r0.t === Error && r1.t === Error) {
       return error(r0.e, r1.e);
     }
 
@@ -195,15 +195,15 @@ namespace Result {
     r0: Result<V, E>,
     r1: Result<V, E>
   ): number {
-    if (r0.type === Ok && r1.type === Ok) {
+    if (r0.t === Ok && r1.t === Ok) {
       return ok(r0.v, r1.v);
     }
 
-    if (r0.type === Err && r1.type === Err) {
+    if (r0.t === Error && r1.t === Error) {
       return error(r0.e, r1.e);
     }
 
-    if (r0.type === Ok && r1.type === Err) {
+    if (r0.t === Ok && r1.t === Error) {
       // Ok is considered smaller than Err
       return -1;
     }
@@ -218,16 +218,16 @@ namespace Result {
    * `to_option r` is `r` as an option, mapping `Ok v` to `Some v` and `Error _` to `None`.
    */
   export function to_option<V, E>(r: Result<V, E>): Option<V> {
-    return r.type === Ok ? Option.some(r.v) : Option.none();
+    return r.t === Ok ? Option.some(r.v) : Option.none();
   }
 
   export function to_list<V, E>(r: Result<V, E>): V[] {
-    return r.type === Ok ? [r.v] : [];
+    return r.t === Ok ? [r.v] : [];
   }
 
   export function to_seq<V, E>(r: Result<V, E>): Iterable<V> {
     return (function* () {
-      if (r.type === Ok) {
+      if (r.t === Ok) {
         yield r.v;
       }
     })();

@@ -155,7 +155,7 @@ namespace Option {
      * `to_result(none, o) is `Ok<V>` if `o` is `Some<V>` and `Err<typeof none>` otherwise.
      */
     export function to_result<T, E>(none: E, o: Option<T>): Result<T, E> {
-        return o.type === Some ? Result.ok(o.v) : Result.err(none);
+        return o.type === Some ? Result.ok(o.v) : Result.error(none);
     }
 
     /**
