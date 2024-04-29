@@ -1,5 +1,5 @@
-import { InvalidArgument } from "./errors";
-import Result from "./results";
+import { InvalidArgument } from "./Exceptions";
+import Result from "./Result";
 
 /**
  * The type for option values. Either `None` or a value `Some<V>`.

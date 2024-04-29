@@ -1,4 +1,4 @@
-import Result from "./modules/results";
-import Option from "./modules/options";
+import Result from "./modules/Result";
+import Option from "./modules/Option";
 
 export { Result, Option };
