@@ -145,7 +145,6 @@ namespace Char {
         // return Hashtbl.hash(c);
     };
 
-
     /* --- Conversions --- */
 
     export const of_int = (i: int): char => String.fromCharCode(i) as char;
