@@ -1,8 +1,8 @@
 import { Nominal } from "../utils.ts";
-import { InvalidArgument } from "./Exceptions";
+import { Invalid_argument } from "./Exceptions";
 
 export type int = Nominal<number, "int">;
-export const int = <V extends number | bigint | string>(v: V): int => {
+export const int = (v: number | bigint | string): int => {
     let n: number;
     switch (typeof v) {
         case "number":
@@ -11,23 +11,23 @@ export const int = <V extends number | bigint | string>(v: V): int => {
         case "bigint":
             n = Number(v);
             if (isNaN(n)) {
-                throw new InvalidArgument("Invalid integer literal");
+                throw new Invalid_argument("Invalid integer literal");
             }
             break;
         case "string":
             n = parseInt(v, 10);
             if (isNaN(n)) {
-                throw new InvalidArgument("Invalid integer literal");
+                throw new Invalid_argument("Invalid integer literal");
             }
             break;
         default:
-            throw new InvalidArgument("Invalid integer literal");
+            throw new Invalid_argument("Invalid integer literal");
     }
     if (n > Number.MAX_SAFE_INTEGER) {
-        throw new InvalidArgument("Integer literal too large");
+        throw new Invalid_argument("Integer literal too large");
     }
     if (n < Number.MIN_SAFE_INTEGER) {
-        throw new InvalidArgument("Integer literal too small");
+        throw new Invalid_argument("Integer literal too small");
     }
     return n as int;
 };
@@ -78,19 +78,19 @@ namespace Int {
 
     /**
      * `div(x, y)` is the division `x / y`.
-     * @throws {InvalidArgument} if y is zero.
+     * @throws {Invalid_argument} if y is zero.
      */
     export const div = (x: int, y: int) => {
-        if (y === zero) throw new InvalidArgument("Division by zero");
+        if (y === zero) throw new Invalid_argument("Division by zero");
         return int(x / y);
     };
 
     /**
      * `rem(x, y)` is the remainder `x mod y`.
-     * @throws {InvalidArgument} if y is zero.
+     * @throws {Invalid_argument} if y is zero.
      */
     export const rem = (x: int, y: int) => {
-        if (y === zero) throw new InvalidArgument("Division by zero");
+        if (y === zero) throw new Invalid_argument("Division by zero");
         return int(x % y);
     };
 
@@ -192,7 +192,7 @@ namespace Int {
      */
     export const of_float = (x: number): int => {
         if (isNaN(x) || x < Number.MIN_SAFE_INTEGER || x > Number.MAX_SAFE_INTEGER) {
-            throw new InvalidArgument(
+            throw new Invalid_argument(
                 "Argument is NaN or outside the range of representable integers",
             );
         }
