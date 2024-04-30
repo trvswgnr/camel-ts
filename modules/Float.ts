@@ -3,7 +3,7 @@ import { Invalid_argument, Failure, Not_implemented } from "./Exceptions";
 import { int } from "./Int";
 import Option from "./Option";
 
-export type float = number;
+export type float = Nominal<number, "float">;
 export const float = (v: number | bigint | string): float => {
     let n: number;
     switch (typeof v) {
@@ -44,7 +44,7 @@ namespace Float {
     /**
      * The floating point 0.
      */
-    export const zero: float = 0;
+    export const zero: float = 0 as float;
 
     export type minus_zero = Nominal<float & -0, "minus_zero">;
     export const minus_zero: minus_zero = -0 as minus_zero;
@@ -56,44 +56,45 @@ namespace Float {
     /**
      * The floating point 1.
      */
-    export const one: float = 1;
+    export const one: float = 1 as float;
 
     /**
      * The floating-point -1.
      */
-    export const minus_one: float = -1;
+    export const minus_one: float = -1 as float;
 
     /**
      * Unary negation.
      */
-    export const neg = (x: float): float => -x;
+    export const neg = (x: float): float => -x as float;
 
     /**
      * Floating-point addition.
      */
-    export const add = (x: float, y: float): float => x + y;
+    export const add = (x: float, y: float): float => (x + y) as float;
 
     /**
      * Floating-point subtraction.
      */
-    export const sub = (x: float, y: float): float => x - y;
+    export const sub = (x: float, y: float): float => (x - y) as float;
 
     /**
      * Floating-point multiplication.
      */
-    export const mul = (x: float, y: float): float => x * y;
+    export const mul = (x: float, y: float): float => (x * y) as float;
 
     /**
      * Floating-point division.
      */
-    export const div = (x: float, y: float): float => x / y;
+    export const div = (x: float, y: float): float => (x / y) as float;
 
     /**
      * `fma(x, y, z)` returns `x * y + z`,  with a best effort for computing
      * this expression with a single rounding, using either hardware
      * instructions (providing full IEEE compliance) or a software emulation.
      */
-    export const fma = (x: float, y: float, z: float): float => x * y + z;
+    export const fma = (x: float, y: float, z: float): float =>
+        (x * y + z) as float;
 
     /**
      * `rem(a, b)` returns the remainder of `a` with respect to `b`. The returned
@@ -102,7 +103,7 @@ namespace Float {
      */
     export const rem = (a: float, b: float): float => {
         const n = Math.trunc(a / b);
-        return a - n * b;
+        return (a - n * b) as float;
     };
 
     /**
@@ -111,42 +112,48 @@ namespace Float {
      */
     export const succ = (x: float): float => {
         if (x !== x) return x;
-        if (x === -1 / 0) return -Number.MAX_VALUE;
-        if (x === 1 / 0) return +1 / 0;
-        if (x === Number.MAX_VALUE) return +1 / 0;
+        if (x === -1 / 0) return -Number.MAX_VALUE as float;
+        if (x === 1 / 0) return (+1 / 0) as float;
+        if (x === Number.MAX_VALUE) return (+1 / 0) as float;
         let y = x * (x < 0 ? 1 - Number.EPSILON / 2 : 1 + Number.EPSILON);
         if (y === x) {
             const n = Number.MIN_VALUE * Number.EPSILON;
             y = n > 0 ? x + n : x + Number.MIN_VALUE;
         }
-        if (y === +1 / 0) y = +Number.MAX_VALUE;
+        if (y === +1 / 0) {
+            y = +Number.MAX_VALUE;
+        }
         let b = x + (y - x) / 2;
-        if (x < b && b < y) y = b;
-        let c = (y + x) / 2;
-        if (x < c && c < y) y = c;
-        return y === 0 ? -0 : y;
+        if (x < b && b < y) {
+            y = b;
+        }
+        const c = (y + x) / 2;
+        if (x < c && c < y) {
+            y = c;
+        }
+        return (y === 0 ? -0 : y) as float;
     };
 
     /**
      * `pred(x)` returns the floating point number right before `x` i.e., the
      * largest floating-point number less than `x`.
      */
-    export const pred = (x: float): float => -succ(-x);
+    export const pred = (x: float): float => -succ(-x as float) as float;
 
     /**
      * `abs(x)` returns the absolute value of `x`.
      */
-    export const abs = (x: float): float => Math.abs(x);
+    export const abs = (x: float): float => Math.abs(x) as float;
 
     /**
      * Positive infinity.
      */
-    export const infinity: float = Infinity;
+    export const infinity: float = Infinity as float;
 
     /**
      * Negative infinity.
      */
-    export const neg_infinity: float = -Infinity;
+    export const neg_infinity: float = -Infinity as float;
 
     /**
      * A special floating-point value denoting the result of an undefined
@@ -156,28 +163,28 @@ namespace Float {
      * comparisons, `=`, `<`, `<=`, `>` and `>=` return `false` and `<>` returns
      * `true` if one or both of their arguments is `nan`.
      */
-    export const nan: float = NaN;
+    export const nan: float = NaN as float;
 
     /**
      * The constant pi.
      */
-    export const pi: float = Math.PI;
+    export const pi: float = Math.PI as float;
 
     /**
      * The largest possible finite value of type `float`.
      */
-    export const max_float: float = Number.MAX_VALUE;
+    export const max_float: float = Number.MAX_VALUE as float;
 
     /**
      * The smallest possible, non-zero, non-denormalized value of type `float`.
      */
-    export const min_float: float = Number.MIN_VALUE;
+    export const min_float: float = Number.MIN_VALUE as float;
 
     /**
      * The difference between `1.0` and the smallest exactly representable
      * floating-point number greater than `1.0`.
      */
-    export const epsilon: float = Number.EPSILON;
+    export const epsilon: float = Number.EPSILON as float;
 
     /**
      * `is_finite(x)` is `true` if and only if `x` is finite i.e., not inifite
@@ -201,12 +208,12 @@ namespace Float {
     /**
      * `is_integer(x)` is `true` if and only if `x` is an integer.
      */
-    export const is_integer = (x: float): x is int => Number.isInteger(x);
+    export const is_integer = (x: float): boolean => Number.isInteger(x);
 
     /**
      * Converts an integer to a floating-point number.
      */
-    export const of_int = (i: int): float => i as float;
+    export const of_int = (i: int): float => float(i);
 
     /**
      * Truncate the given floating-point number to an integer. The result is
@@ -225,7 +232,7 @@ namespace Float {
         if (isNaN(f)) {
             throw new Failure(`Invalid float literal: ${s}`);
         }
-        return f;
+        return f as float;
     };
 
     /**
@@ -236,7 +243,7 @@ namespace Float {
         if (isNaN(f)) {
             return Option.none();
         }
-        return Option.some(f);
+        return Option.some(f as float);
     };
 
     /**
@@ -294,93 +301,94 @@ namespace Float {
     /**
      * Exponentiation.
      */
-    export const pow = (x: float, y: float): float => Math.pow(x, y);
+    export const pow = (x: float, y: float): float => Math.pow(x, y) as float;
 
     /**
      * Square root.
      */
-    export const sqrt = (x: float): float => Math.sqrt(x);
+    export const sqrt = (x: float): float => Math.sqrt(x) as float;
 
     /**
      * Cube root.
      */
-    export const cbrt = (x: float): float => Math.cbrt(x);
+    export const cbrt = (x: float): float => Math.cbrt(x) as float;
 
     /**
      * Exponential function.
      */
-    export const exp = (x: float): float => Math.exp(x);
+    export const exp = (x: float): float => Math.exp(x) as float;
 
     /**
      * Base 2 exponential function.
      */
-    export const exp2 = (x: float): float => Math.pow(2, x);
+    export const exp2 = (x: float): float => Math.pow(2, x) as float;
 
     /**
      * Natural logarithm.
      */
-    export const log = (x: float): float => Math.log(x);
+    export const log = (x: float): float => Math.log(x) as float;
 
     /**
      * Base 10 logarithm.
      */
-    export const log10 = (x: float): float => Math.log10(x);
+    export const log10 = (x: float): float => Math.log10(x) as float;
 
     /**
      * Base 2 logarithm.
      */
-    export const log2 = (x: float): float => Math.log2(x);
+    export const log2 = (x: float): float => Math.log2(x) as float;
 
     /**
      * `expm1(x)` computes `exp(x) - 1.0`, giving numerically-accurate results
      * even if `x` is close to `0.0`.
      */
-    export const expm1 = (x: float): float => Math.expm1(x);
+    export const expm1 = (x: float): float => Math.expm1(x) as float;
 
     /**
      * `log1p(x)` computes `log(1.0 + x)` (natural logarithm), giving
      * numerically-accurate results even if `x` is close to `0.0`.
      */
-    export const log1p = (x: float): float => Math.log1p(x);
+    export const log1p = (x: float): float => Math.log1p(x) as float;
 
     /**
      * Cosine. Argument is in radians.
      */
-    export const cos = (x: float): float => Math.cos(x);
+    export const cos = (x: float): float => Math.cos(x) as float;
 
     /**
      * Sine. Argument is in radians.
      */
-    export const sin = (x: float): float => Math.sin(x);
+    export const sin = (x: float): float => Math.sin(x) as float;
 
     /**
      * Tangent. Argument is in radians.
      */
-    export const tan = (x: float): float => Math.tan(x);
+    export const tan = (x: float): float => Math.tan(x) as float;
 
     /**
      * Arc cosine. The argument must fall within the range `[-1.0, 1.0]`. Result
      * is in radians and is between `0.0` and `pi`.
      */
-    export const acos = (x: float): float => Math.acos(x);
+    export const acos = (x: float): float => Math.acos(x) as float;
 
     /**
      * Arc sine. The argument must fall within the range `[-1.0, 1.0]`. Result
      * is in radians and is between `-pi/2` and `pi/2`.
      */
-    export const asin = (x: float): float => Math.asin(x);
+    export const asin = (x: float): float => Math.asin(x) as float;
 
     /**
      * Arc tangent. Result is in radians and is between `-pi/2` and `pi/2`.
      */
-    export const atan = (x: float): float => Math.atan(x);
+    export const atan = (x: float): float => Math.atan(x) as float;
 
     /**
      * `atan2(y, x)` returns the arc tangent of `y / x`. The signs of `x` and `y`
      * are used to determine the quadrant of the result. Result is in radians
      * and is between `-pi` and `pi`.
      */
-    export const atan2 = (y: float, x: float): float => Math.atan2(y, x);
+    export const atan2 = (y: float, x: float): float =>
+        Math.atan2(y, x) as float;
 
     /**
      * `hypot(x, y)` returns the square root of `x * x + y * y`, that is, the
@@ -389,40 +397,41 @@ namespace Float {
      * origin. If one of `x` or `y` is infinite, returns infinity even if the
      * other is `nan`.
      */
-    export const hypot = (x: float, y: float): float => Math.hypot(x, y);
+    export const hypot = (x: float, y: float): float =>
+        Math.hypot(x, y) as float;
 
     /**
      * Hyperbolic cosine. Argument is in radians.
      */
-    export const cosh = (x: float): float => Math.cosh(x);
+    export const cosh = (x: float): float => Math.cosh(x) as float;
 
     /**
      * Hyperbolic sine. Argument is in radians.
      */
-    export const sinh = (x: float): float => Math.sinh(x);
+    export const sinh = (x: float): float => Math.sinh(x) as float;
 
     /**
      * Hyperbolic tangent. Argument is in radians.
      */
-    export const tanh = (x: float): float => Math.tanh(x);
+    export const tanh = (x: float): float => Math.tanh(x) as float;
 
     /**
      * Hyperbolic arc cosine. The argument must fall within the range `[1.0,
      * inf]`. Result is in radians and is between `0.0` and `inf`.
      */
-    export const acosh = (x: float): float => Math.acosh(x);
+    export const acosh = (x: float): float => Math.acosh(x) as float;
 
     /**
      * Hyperbolic arc sine. The argument and result range over the entire real
      * line. Result is in radians.
      */
-    export const asinh = (x: float): float => Math.asinh(x);
+    export const asinh = (x: float): float => Math.asinh(x) as float;
 
     /**
      * Hyperbolic arc tangent. The argument must fall within the range `[-1.0,
      * 1.0]`. Result is in radians and ranges over the entire real line.
      */
-    export const atanh = (x: float): float => Math.atanh(x);
+    export const atanh = (x: float): float => Math.atanh(x) as float;
 
     /**
      * Error function. The argument ranges over the entire real line. The result
@@ -437,7 +446,7 @@ namespace Float {
         const p = 0.3275911;
 
         const sign = x < 0 ? -1 : 1;
-        x = Math.abs(x);
+        x = Math.abs(x) as float;
 
         const t = 1.0 / (1.0 + p * x);
         const y =
@@ -446,20 +455,20 @@ namespace Float {
                 t *
                 Math.exp(-x * x);
 
-        return sign * y;
+        return (sign * y) as float;
     };
 
     /**
      * Complementary error function (`erfc x = 1 - erf x`). The argument ranges
      * over the entire real line. The result is always within `[-1.0, 1.0]`.
      */
-    export const erfc = (x: float): float => 1 - erf(x);
+    export const erfc = (x: float): float => (1 - erf(x)) as float;
 
     /**
      * `trunc(x)` rounds `x` to the nearest integer whose absolute value is less
      * than or equal to `x`.
      */
-    export const trunc = (x: float): float => Math.trunc(x);
+    export const trunc = (x: float): float => Math.trunc(x) as float;
 
     /**
      * `round(x)` rounds `x` to the nearest integer with ties (fractional values of
@@ -471,20 +480,20 @@ namespace Float {
         if (is_nan(x) || is_infinite(x) || x === 0) {
             return x;
         }
-        return Math.round(x);
+        return Math.round(x) as float;
     };
 
     /**
      * Round above to an integer value. `ceil(f)` returns the least integer value
      * greater than or equal to `f`. The result is returned as a float.
      */
-    export const ceil = (x: float): float => Math.ceil(x);
+    export const ceil = (x: float): float => Math.ceil(x) as float;
 
     /**
      * Round below to an integer value. `floor(f)` returns the greatest integer
      * value less than or equal to `f`. The result is returned as a float.
      */
-    export const floor = (x: float): float => Math.floor(x);
+    export const floor = (x: float): float => Math.floor(x) as float;
 
     /**
      * `next_after(x, y)` returns the next representable floating-point value
@@ -504,9 +513,9 @@ namespace Float {
     };
 
     export function sign(x: float): float {
-        if (Number(x) !== Number(x)) return NaN;
-        if (x === -Infinity) return -1;
-        return 1 / x < 0 ? -1 : 1;
+        if (Number(x) !== Number(x)) return NaN as float;
+        if (x === -Infinity) return -1 as float;
+        return (1 / x < 0 ? -1 : 1) as float;
     }
 
     /**
@@ -515,7 +524,7 @@ namespace Float {
      * returns either `x` or `-x`, but it is not specified which.
      */
     export const copy_sign = (x: float, y: float): float => {
-        return sign(y) * abs(x);
+        return (sign(y) * abs(x)) as float;
     };
 
     /**
@@ -533,7 +542,7 @@ namespace Float {
      */
     export const frexp = (value: float): [float, int] => {
         if (value === 0) {
-            return [0, int(0)]; // Special case for zero
+            return [0 as float, 0 as int]; // Special case for zero
         }
 
         const s = sign(value);
@@ -547,13 +556,14 @@ namespace Float {
             exponent -= 1;
         }
 
-        return [s * mantissa, int(exponent)];
+        return [(s * mantissa) as float, int(exponent)];
     };
 
     /**
      * `ldexp(x, n)` returns `x * 2 ** n`.
      */
-    export const ldexp = (x: float, n: int): float => x * Math.pow(2, n);
+    export const ldexp = (x: float, n: int): float =>
+        (x * Math.pow(2, n)) as float;
 
     /**
      * `modf(f)` returns the pair of the fractional and integral part of `f`.
