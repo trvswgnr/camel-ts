@@ -2,11 +2,18 @@ import { Nominal } from "../utils.ts";
 import { Invalid_argument } from "./Exceptions";
 
 export type int = Nominal<number, "int">;
+/**
+ * `int(v)` is a utility to make `int` more convenient to use in JavaScript
+ * land. It converts attempts to convert a `number`, `bigint`, or `string` to an
+ * integer, making sure that the result is a valid integer literal.
+ * @throws {Invalid_argument} if the argument is not a valid integer literal.
+ * @throws {Invalid_argument} if the argument is outside the range of representable integers.
+ */
 export const int = (v: number | bigint | string): int => {
     let n: number;
     switch (typeof v) {
         case "number":
-            n = v;
+            n = Math.trunc(v);
             break;
         case "bigint":
             n = Number(v);
@@ -44,37 +51,37 @@ namespace Int {
     /**
      * `zero` is the integer `0`.
      */
-    export const zero: int = int(0);
+    export const zero: int = 0 as int;
 
     /**
      * `one` is the integer `1`.
      */
-    export const one: int = int(1);
+    export const one: int = 1 as int;
 
     /**
      * `minus_one` is the integer `-1`.
      */
-    export const minus_one: int = int(-1);
+    export const minus_one: int = -1 as int;
 
     /**
      * `neg(x)` is `-x`.
      */
-    export const neg = (x: int): int => int(-x);
+    export const neg = (x: int): int => -x as int;
 
     /**
      * `add(x, y)` is the addition `x + y`.
      */
-    export const add = (x: int, y: int): int => int(x + y);
+    export const add = (x: int, y: int): int => (x + y) as int;
 
     /**
      * `sub(x, y)` is the subtraction `x - y`.
      */
-    export const sub = (x: int, y: int): int => int(x - y);
+    export const sub = (x: int, y: int): int => (x - y) as int;
 
     /**
      * `mul(x, y)` is the multiplication `x * y`.
      */
-    export const mul = (x: int, y: int): int => int(x * y);
+    export const mul = (x: int, y: int): int => (x * y) as int;
 
     /**
      * `div(x, y)` is the division `x / y`.
@@ -167,7 +174,8 @@ namespace Int {
     /**
      * `compare(x, y)` compares two integers and returns -1, 0, or 1.
      */
-    export const compare = (x: int, y: int): int => int(x < y ? -1 : x > y ? 1 : 0);
+    export const compare = (x: int, y: int): int =>
+        int(x < y ? -1 : x > y ? 1 : 0);
 
     /**
      * `min(x, y)` returns the smaller of two integers.
@@ -191,7 +199,11 @@ namespace Int {
      * The result is unspecified if the argument is NaN or falls outside the range of representable integers.
      */
     export const of_float = (x: number): int => {
-        if (isNaN(x) || x < Number.MIN_SAFE_INTEGER || x > Number.MAX_SAFE_INTEGER) {
+        if (
+            isNaN(x) ||
+            x < Number.MIN_SAFE_INTEGER ||
+            x > Number.MAX_SAFE_INTEGER
+        ) {
             throw new Invalid_argument(
                 "Argument is NaN or outside the range of representable integers",
             );
@@ -202,7 +214,7 @@ namespace Int {
     /**
      * `to_string(x)` returns the string representation of an integer.
      */
-    export const to_string = (x: int): string => x.toString() as any;
+    export const to_string = (x: int): string => String(x);
 
     /* --- Hashing --- */
 
@@ -210,17 +222,32 @@ namespace Int {
      * `seeded_hash(seed, x)` is a seeded hash function for integers.
      */
     export const seeded_hash = (seed: int, x: int): int => {
-        const h1 = (seed << 6) + (seed >> 2);
-        return (h1 + x) as int;
+        const m = 0x5bd1e995;
+        const r = 24;
+        let h = seed ^ x;
+        h = imul(h, m);
+        h ^= h >>> r;
+        h = imul(h, m);
+        h ^= h >>> r;
+        h = imul(h, m);
+        return int(h);
     };
 
     /**
      * `hash(x)` is an unseeded hash function for integers.
      */
     export const hash = (x: int): int => {
-        const h1 = 0xdeadbeef;
-        return (h1 + x) as int;
+        const h1 = 0xdeadbeef as int;
+        return seeded_hash(h1, x);
     };
 }
+
+const imul = (a: number, b: number): number => {
+    const aHi = (a >>> 16) & 0xffff;
+    const aLo = a & 0xffff;
+    const bHi = (b >>> 16) & 0xffff;
+    const bLo = b & 0xffff;
+    return aLo * bLo + (((aHi * bLo + aLo * bHi) << 16) >>> 0);
+};
 
 export default Int;
