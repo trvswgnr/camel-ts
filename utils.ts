@@ -50,3 +50,13 @@ export type Immutable<T> = T extends object
               : T[K];
       }
     : T;
+
+export const switch_assign = <T>(
+    default_value: T,
+    ...cases: Array<[boolean, T]>
+) => {
+    for (const [c, r] of cases) {
+        if (c) return r;
+    }
+    return default_value;
+};
