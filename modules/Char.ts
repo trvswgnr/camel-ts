@@ -5,7 +5,7 @@ import type { int } from "./Int";
 export type char = Nominal<string, "char">;
 export const char = (s: string): char => {
     const c = s[0];
-    if (!c) throw new Invalid_argument("must be a single character");
+    if (!c) throw new Invalid_argument("must be a valid single character");
     return c as char;
 };
 
