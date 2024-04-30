@@ -1,4 +1,4 @@
-import { InvalidArgument } from "./Exceptions";
+import { Invalid_argument } from "./Exceptions";
 
 const g = globalThis;
 
