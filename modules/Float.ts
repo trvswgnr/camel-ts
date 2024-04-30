@@ -1,5 +1,5 @@
 import type { Nominal } from "../utils";
-import { Invalid_argument, Failure, Not_implemented } from "./Exceptions";
+import { Failure, Not_implemented } from "./Exceptions";
 import { int } from "./Int";
 import Option, { type option } from "./Option";
 
