@@ -13,3 +13,5 @@ namespace Array {
         return a.length;
     }
 }
+
+export default Array;
