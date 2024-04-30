@@ -1,5 +1,5 @@
 import { Invalid_argument } from "./Exceptions";
-import Option from "./Option";
+import Option, { type option } from "./Option";
 
 /**
  * The type for `Result` values. Either a value `Ok v` or an error `Err e`.
@@ -72,7 +72,9 @@ namespace Result {
         if (r.t === Ok) {
             return r.v;
         }
-        throw new Invalid_argument("tried to get Ok value of Result that is Err");
+        throw new Invalid_argument(
+            "tried to get Ok value of Result that is Err",
+        );
     }
 
     /**
@@ -83,13 +85,18 @@ namespace Result {
         if (r.t === Error) {
             return r.e;
         }
-        throw new Invalid_argument("tried to get Err value of Result that is Ok");
+        throw new Invalid_argument(
+            "tried to get Err value of Result that is Ok",
+        );
     }
 
     /**
      * `bind(r, f)` is `f(v)` if `r` is `Ok<V>` and `r` otherwise.
      */
-    export function bind<V, E, B>(r: Result<V, E>, f: (v: V) => Result<B, E>): Result<B, E> {
+    export function bind<V, E, B>(
+        r: Result<V, E>,
+        f: (v: V) => Result<B, E>,
+    ): Result<B, E> {
         return r.t === Ok ? f(r.v) : r;
     }
 
@@ -103,21 +110,31 @@ namespace Result {
     /**
      * `map(f, r)` is `Ok<f(v)>` if `r` is `Ok<V>` and `r` otherwise.
      */
-    export function map<V, E, B>(f: (v: V) => B, r: Result<V, E>): Result<B, E> {
+    export function map<V, E, B>(
+        f: (v: V) => B,
+        r: Result<V, E>,
+    ): Result<B, E> {
         return r.t === Ok ? ok(f(r.v)) : r;
     }
 
     /**
      * `map_err(f, r)` is `Err<f(e)>` if `r` is `Err<E>` and `r` otherwise.
      */
-    export function map_err<V, E, F>(f: (e: E) => F, r: Result<V, E>): Result<V, F> {
+    export function map_err<V, E, F>(
+        f: (e: E) => F,
+        r: Result<V, E>,
+    ): Result<V, F> {
         return r.t === Error ? error(f(r.e)) : r;
     }
 
     /**
      * `fold(ok, error, r)` is `ok(v)` if `r` is `Ok<V>` and `error(e)` otherwise.
      */
-    export function fold<V, E, C>(ok: (v: V) => C, error: (e: E) => C, r: Result<V, E>): C {
+    export function fold<V, E, C>(
+        ok: (v: V) => C,
+        error: (e: E) => C,
+        r: Result<V, E>,
+    ): C {
         return r.t === Ok ? ok(r.v) : error(r.e);
     }
 
@@ -207,7 +224,7 @@ namespace Result {
     /**
      * `to_option r` is `r` as an option, mapping `Ok v` to `Some v` and `Error _` to `None`.
      */
-    export function to_option<V, E>(r: Result<V, E>): Option<V> {
+    export function to_option<V, E>(r: Result<V, E>): option<V> {
         return r.t === Ok ? Option.some(r.v) : Option.none();
     }
 
