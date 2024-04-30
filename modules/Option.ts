@@ -1,10 +1,10 @@
 import { Invalid_argument } from "./Exceptions";
-import Result from "./Result";
+import Result, { type result } from "./Result";
 
 /**
  * The type for option values. Either `None` or a value `Some<V>`.
  */
-export type option<a> = Option.None | Option.Some<a>;
+export type option<v> = Option.None | Option.Some<v>;
 
 type Nullable<V> = V | null | undefined;
 
@@ -164,9 +164,9 @@ namespace Option {
     /* -- Converting -- */
 
     /**
-     * `to_result(none, o) is `Ok<V>` if `o` is `Some<V>` and `Err<typeof none>` otherwise.
+     * `to_result(none, o) is `Ok(v)` if `o` is `Some(v)` and `Err(none)` otherwise.
      */
-    export function to_result<T, E>(none: E, o: option<T>): Result<T, E> {
+    export function to_result<v, e>(none: e, o: option<v>): result<v, e> {
         return o.type === Some ? Result.ok(o.v) : Result.error(none);
     }
 
