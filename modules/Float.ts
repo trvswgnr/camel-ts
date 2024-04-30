@@ -4,26 +4,6 @@ import { int } from "./Int";
 import Option, { type option } from "./Option";
 
 export type float = Nominal<number, "float">;
-export const float = (v: number | bigint | string): float => {
-    let n: number;
-    switch (typeof v) {
-        case "number":
-            n = v;
-            break;
-        case "string":
-            n = parseFloat(v);
-            break;
-        case "bigint":
-            n = Number(v);
-            break;
-        default:
-            throw new Invalid_argument("Invalid float literal");
-    }
-    if (isNaN(n)) {
-        throw new Invalid_argument("Invalid float literal");
-    }
-    return n as float;
-};
 
 /**
  * Floating-point arithmetic.
@@ -39,7 +19,6 @@ export const float = (v: number | bigint | string): float => {
  */
 namespace Float {
     export type t = float;
-    export const t = float;
 
     /**
      * The floating point 0.
@@ -50,7 +29,7 @@ namespace Float {
     export const minus_zero: minus_zero = -0 as minus_zero;
 
     export const is_minus_zero = (zero: float): zero is minus_zero => {
-        return 1 / zero === -Infinity && zero === 0;
+        return zero === 0 && 1 / zero === -Infinity;
     };
 
     /**
@@ -213,7 +192,7 @@ namespace Float {
     /**
      * Converts an integer to a floating-point number.
      */
-    export const of_int = (i: int): float => float(i);
+    export const of_int = (i: int): float => i as any;
 
     /**
      * Truncate the given floating-point number to an integer. The result is
