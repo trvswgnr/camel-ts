@@ -1,5 +1,6 @@
 import { Nominal } from "../utils";
 import { Invalid_argument, Not_implemented } from "./Exceptions";
+import type { float } from "./Float";
 import type { int } from "./Int";
 
 export type char = Nominal<string, "char">;
@@ -143,6 +144,13 @@ namespace Char {
         throw new Not_implemented("Char.hash");
         // return Hashtbl.hash(c);
     };
+
+
+    /* --- Conversions --- */
+
+    export const of_int = (i: int): char => String.fromCharCode(i) as char;
+    export const of_float = (f: float): char => String.fromCharCode(f) as char;
+    export const of_string = (s: string): char => char(s);
 }
 
 export default Char;
