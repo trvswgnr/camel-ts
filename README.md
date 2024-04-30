@@ -7,7 +7,7 @@ A direct translation (or as close as possible) of select parts of OCaml's standa
 
 ## Features
 
--   **Result**: Represents a value (`Ok`) or an error (`Err`), directly modeled
+-   **Result**: Represents a value (`Ok`) or an error (`Error`), directly modeled
     after OCaml's `Result` module and `result` type.
 -   **Option**: Represents a value (`Some`) or no value (`None`), mirroring
     OCaml's `Option` module and `option` type.
