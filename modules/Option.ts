@@ -1,19 +1,19 @@
-import { InvalidArgument } from "./Exceptions";
+import { Invalid_argument } from "./Exceptions";
 import Result from "./Result";
 
 /**
  * The type for option values. Either `None` or a value `Some<V>`.
  */
-type Option<V> = None | Some<V>;
-
-type Some<V> = { type: typeof Option.Some; v: V };
-type None = { type: typeof Option.None };
+type Option<V> = Option.None | Option.Some<V>;
 
 type Nullable<V> = V | null | undefined;
 
 namespace Option {
     export const Some = Symbol("Some");
     export const None = Symbol("None");
+
+    export type Some<V> = { type: typeof Option.Some; v: V };
+    export type None = { type: typeof Option.None };
 
     /* -- Options -- */
 
@@ -27,7 +27,10 @@ namespace Option {
     /**
      * `match(o, cases)` is `cases.Some(v)` if `o` is `Some<V>` and `cases.None()` otherwise.
      */
-    export function match<V, A>(o: Option<V>, cases: { Some: (v: V) => A; None: () => A }): A {
+    export function match<V, A>(
+        o: Option<V>,
+        cases: { Some: (v: V) => A; None: () => A },
+    ): A {
         return o.type === Some ? cases.Some(o.v) : cases.None();
     }
 
@@ -54,11 +57,11 @@ namespace Option {
 
     /**
      * `get(o)` is `v` if `o` is `Some<V>` and throws otherwise.
-     * @throws {InvalidArgument} if `o` is `None`.
+     * @throws {Invalid_argument} if `o` is `None`.
      */
     export function get<V>(o: Option<V>): V {
         if (o.type === None) {
-            throw new InvalidArgument("tried to get value of None");
+            throw new Invalid_argument("tried to get value of None");
         }
         return o.v;
     }
@@ -66,7 +69,10 @@ namespace Option {
     /**
      * `bind(o, f)` is `f(v)` if `o` is `Some<V>` and `None` if `o` is `None`.
      */
-    export function bind<V, U>(o: Option<V>, f: (v: V) => Option<U>): Option<U> {
+    export function bind<V, U>(
+        o: Option<V>,
+        f: (v: V) => Option<U>,
+    ): Option<U> {
         return o.type === Some ? f(o.v) : none();
     }
 
@@ -119,7 +125,11 @@ namespace Option {
     /**
      * `equal(eq, o0, o1)` is `true` if and only if `o0` and `o1` are `None` or `Some<V>` and `eq(v0, v1)` is `true`.
      */
-    export function equal<V>(eq: (v0: V, v1: V) => boolean, o0: Option<V>, o1: Option<V>): boolean {
+    export function equal<V>(
+        eq: (v0: V, v1: V) => boolean,
+        o0: Option<V>,
+        o1: Option<V>,
+    ): boolean {
         if (o0.type === None && o1.type === None) {
             return true;
         }
