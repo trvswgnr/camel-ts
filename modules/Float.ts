@@ -1,7 +1,7 @@
 import type { Nominal } from "../utils";
 import { Invalid_argument, Failure, Not_implemented } from "./Exceptions";
 import { int } from "./Int";
-import Option from "./Option";
+import Option, { type option } from "./Option";
 
 export type float = Nominal<number, "float">;
 export const float = (v: number | bigint | string): float => {
@@ -238,7 +238,7 @@ namespace Float {
     /**
      * Same as `of_string`, but returns `None` instead of raising.
      */
-    export const of_string_opt = (s: string): Option<float> => {
+    export const of_string_opt = (s: string): option<float> => {
         const f = parseFloat(s);
         if (isNaN(f)) {
             return Option.none();
