@@ -2,6 +2,7 @@ import { Nominal } from "../utils.ts";
 import { Invalid_argument } from "./Exceptions";
 
 export type int = Nominal<number, "int">;
+
 /**
  * `int(v)` is a utility to make `int` more convenient to use in JavaScript
  * land. It converts attempts to convert a `number`, `bigint`, or `string` to an
@@ -40,6 +41,8 @@ export const int = (v: number | bigint | string): int => {
 };
 
 namespace Int {
+    export type of_number<N extends number> = number extends N ? never : int;
+
     /* --- Integers --- */
 
     /**

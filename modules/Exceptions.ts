@@ -30,6 +30,10 @@ export class Failure extends Exception<string> {
     }
 }
 
+export const failwith = <T>(message: string): T => {
+    throw new Failure(message);
+};
+
 /**
  * Exception raised by library functions to signal that they have not been
  * implemented yet.

@@ -3,7 +3,7 @@ import { Nominal } from "../utils";
 import Int, { type int } from "./Int";
 import Float, { type float } from "./Float";
 import type { list } from "./List";
-import List from "./List";
+import list from "./List";
 import Option, { type option } from "./Option";
 
 class _array<T> {
