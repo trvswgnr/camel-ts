@@ -3,12 +3,16 @@
 > [!WARNING]  
 > This project is just something I'm doing for fun. It is not—and may not ever be—meant for use in any serious capacity.
 
-A direct translation (or as close as possible) of OCaml's `Result` and `Option` modules in TypeScript, providing robust handling for optional and error-handling patterns. It allows for expressive and safe code by encapsulating the presence or absence of values and errors, mirroring the functionality and API of OCaml.
+A direct translation (or as close as possible) of select parts of OCaml's standard library in TypeScript.
 
 ## Features
 
--   **Result Type**: Represents a value (`Ok`) or an error (`Err`), directly modeled after OCaml's `Result` module.
--   **Option Type**: Represents a value (`Some`) or no value (`None`), mirroring OCaml's `Option` module.
+-   **Result**: Represents a value (`Ok`) or an error (`Err`), directly modeled after OCaml's `Result` module.
+-   **Option**: Represents a value (`Some`) or no value (`None`), mirroring
+    OCaml's `Option` module.
+-   **Float**: A direct translation of OCaml's `Float` module with nominal typing.
+-   **Int**: A direct translation of OCaml's `Int` module with nominal typing.
+-   **Exceptions**: Some OCaml exceptions are translated to TypeScript errors.
 
 ## Installation
 
