@@ -7,11 +7,14 @@ A direct translation (or as close as possible) of select parts of OCaml's standa
 
 ## Features
 
--   **Result**: Represents a value (`Ok`) or an error (`Err`), directly modeled after OCaml's `Result` module.
+-   **Result**: Represents a value (`Ok`) or an error (`Err`), directly modeled
+    after OCaml's `Result` module and `result` type.
 -   **Option**: Represents a value (`Some`) or no value (`None`), mirroring
-    OCaml's `Option` module.
--   **Float**: A direct translation of OCaml's `Float` module with nominal typing.
--   **Int**: A direct translation of OCaml's `Int` module with nominal typing.
+    OCaml's `Option` module and `option` type.
+-   **Float**: A direct translation of OCaml's `float` type and `Float` module.
+-   **Int**: A direct translation of OCaml's `int` type and `Int` module.
+-   **Char**: A direct translation of OCaml's `char` type and `Char` module.
+-   **Array**: A custom implementation of OCaml's `array` type and `Array` module.
 -   **Exceptions**: Some OCaml exceptions are translated to TypeScript errors.
 
 ## Installation
