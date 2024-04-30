@@ -1,4 +1,4 @@
-import { InvalidArgument } from "./Exceptions";
+import { Invalid_argument } from "./Exceptions";
 import Option from "./Option";
 
 /**
@@ -66,24 +66,24 @@ namespace Result {
 
     /**
      * `get_ok(r)` is `v` if `r` is `Ok<V>` and throws an error otherwise.
-     * @throws {InvalidArgument} if `r` is `Err<E>`.
+     * @throws {Invalid_argument} if `r` is `Err<E>`.
      */
     export function get_ok<V, E>(r: Result<V, E>): V {
         if (r.t === Ok) {
             return r.v;
         }
-        throw new InvalidArgument("tried to get Ok value of Result that is Err");
+        throw new Invalid_argument("tried to get Ok value of Result that is Err");
     }
 
     /**
      * `get_err(r)` is `e` if `r` is `Err<E>` and throws an error otherwise.
-     * @throws {InvalidArgument} if `r` is `Ok<V>`.
+     * @throws {Invalid_argument} if `r` is `Ok<V>`.
      */
     export function get_err<V, E>(r: Result<V, E>): E {
         if (r.t === Error) {
             return r.e;
         }
-        throw new InvalidArgument("tried to get Err value of Result that is Ok");
+        throw new Invalid_argument("tried to get Err value of Result that is Ok");
     }
 
     /**
