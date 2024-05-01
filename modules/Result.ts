@@ -5,8 +5,6 @@ import Option, { type option } from "./Option";
  * The type for `Result` values. Either a value `Ok v` or an error `Err e`.
  */
 export type result<a, e> = Result.t<a, e>;
-export const Ok = Result.ok;
-export const Error = Result.error;
 
 /**
  * Result values.
@@ -253,5 +251,8 @@ namespace Result {
         })();
     }
 }
+
+export const Ok = Result.ok;
+export const Error = Result.error;
 
 export default Result;
