@@ -78,22 +78,16 @@ export const switch_assign = <T>(
     return default_value;
 };
 
-export type Widen<T> = T extends number
+export type WidenLiteral<T> = T extends string
+    ? string
+    : T extends number
     ? number
     : T extends boolean
     ? boolean
-    : T extends string
-    ? string
     : T extends bigint
     ? bigint
     : T extends symbol
     ? symbol
-    : T extends undefined
-    ? undefined
-    : T extends null
-    ? null
-    : T extends object
-    ? object
     : T;
 
 export type NoInfer<A extends any> = [A][A extends any ? 0 : never];
