@@ -4,6 +4,9 @@ import Int, { type int } from "./Int";
 import Option, { type option } from "./Option";
 import { tuple } from "./Tuple";
 
+/**
+ * Represents a list of elements of type `a`.
+ */
 export type list<a> = List.Empty | List.Cons<a>;
 
 /**
