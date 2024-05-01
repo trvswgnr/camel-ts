@@ -1,4 +1,4 @@
-import { tramp, type thunk, Thunk } from "../utils";
+import { tramp, thunk, Thunk } from "../utils";
 import { Failure, Invalid_argument } from "./Exceptions";
 import Int, { type int } from "./Int";
 import Option, { type option } from "./Option";
@@ -37,6 +37,8 @@ namespace List {
         readonly head: T;
         readonly tail: list<T>;
     };
+
+    export type Cons2<a> = Cons<a> & { readonly tail: Cons<a> };
 
     /**
      * `is_list(v)` returns `true` if `v` is a list, and `false` otherwise.
@@ -94,7 +96,7 @@ namespace List {
             case is_empty(l2):
                 return 1;
             case is_cons(l1) && is_cons(l2):
-                return () => compare_lengths(l1.tail, l2.tail);
+                return thunk(() => compare_lengths(l1.tail, l2.tail));
             default:
                 throw new Invalid_argument("List.compare_lengths");
         }
@@ -118,7 +120,7 @@ namespace List {
             return 1;
         }
         if (n <= 0) return 1;
-        return () => compare_length_with(l.tail, (n - 1) as int);
+        return thunk(() => compare_length_with(l.tail, (n - 1) as int));
     }
 
     /**
@@ -188,7 +190,7 @@ namespace List {
         if (n < 0) throw new Invalid_argument("List.nth");
         if (l.t === Empty) throw new Failure("nth");
         if (n === 0) return l.head;
-        return () => nth(l.tail, (n - 1) as int);
+        return thunk(() => nth(l.tail, (n - 1) as int));
     }
 
     /**
@@ -207,7 +209,7 @@ namespace List {
         if (n < 0) throw new Invalid_argument("List.nth");
         if (l.t === Empty) return Option.none();
         if (n === 0) return Option.some(l.head);
-        return () => nth_opt(l.tail, (n - 1) as int);
+        return thunk(() => nth_opt(l.tail, (n - 1) as int));
     }
 
     /**
@@ -234,11 +236,11 @@ namespace List {
         if (i === last) return list(f(i));
         const r1 = f(i);
         const r2 = f((i + 1) as int);
-        return () => {
+        return thunk(() => {
             const l1 = init_helper((i + 2) as int, last, f);
             const l2 = cons(r2, l1);
             return cons(r1, l2);
-        };
+        });
     }
 
     /**
@@ -250,7 +252,7 @@ namespace List {
     };
     function of_js_array_aux<a>(arr: a[]): thunk<list<a>> | list<a> {
         if (arr.length === 0) return empty<a>();
-        return () => cons(arr[0]!, of_js_array(arr.slice(1)));
+        return thunk(() => cons(arr[0]!, of_js_array(arr.slice(1))));
     }
 
     /**
@@ -264,7 +266,7 @@ namespace List {
         if (l0.t === Empty) {
             return l1;
         }
-        return () => cons(l0.head, append(l0.tail, l1));
+        return thunk(() => cons(l0.head, append(l0.tail, l1)));
     }
 
     /**
@@ -279,7 +281,7 @@ namespace List {
         l2: list<a>,
     ): thunk<list<a>> | list<a> {
         if (is_empty(l1)) return l2;
-        return () => rev_append(l1.tail, cons(l1.head, l2));
+        return thunk(() => rev_append(l1.tail, cons(l1.head, l2)));
     }
 
     /**
@@ -291,7 +293,7 @@ namespace List {
     };
     function concat_aux<a>(l: list<list<a>>): thunk<list<a>> | list<a> {
         if (is_empty(l)) return empty<a>();
-        return () => append(hd(l), concat(tl(l)));
+        return thunk(() => append(hd(l), concat(tl(l))));
     }
     export const flatten = concat;
 
@@ -315,7 +317,7 @@ namespace List {
     ): thunk<boolean> | boolean {
         if (is_empty(l1) && is_empty(l2)) return true;
         if (is_empty(l1) || is_empty(l2)) return false;
-        return () => eq(l1.head, l2.head) && equal(l1.tail, l2.tail, eq);
+        return thunk(() => eq(l1.head, l2.head) && equal(l1.tail, l2.tail, eq));
     }
 
     /**
@@ -341,11 +343,11 @@ namespace List {
         if (is_empty(l1) && is_empty(l2)) return Int.zero;
         if (is_empty(l1)) return Int.minus_one;
         if (is_empty(l2)) return Int.one;
-        return () => {
+        return thunk(() => {
             const c = cmp(l1.head, l2.head);
             if (c !== Int.zero) return c;
             return compare(cmp, l1.tail, l2.tail);
-        };
+        });
     }
 
     /* --- Iterators --- */
@@ -359,10 +361,10 @@ namespace List {
     };
     function iter_aux<a>(f: (x: a) => void, l: list<a>): thunk<void> | void {
         if (is_empty(l)) return;
-        return () => {
+        return thunk(() => {
             f(l.head);
             iter(f, l.tail);
-        };
+        });
     }
 
     /**
@@ -382,10 +384,10 @@ namespace List {
         l: list<a>,
     ): thunk<void> | void {
         if (is_empty(l)) return;
-        return () => {
+        return thunk(() => {
             f(i, l.head);
             rec_iteri((i + 1) as int, f, l.tail);
-        };
+        });
     }
 
     /**
@@ -402,11 +404,11 @@ namespace List {
         if (is_empty(l)) return empty<b>();
         const lt = l.tail;
         if (is_empty(lt)) return list(f(l.head));
-        return () => {
+        return thunk(() => {
             const r1 = f(l.head);
             const r2 = f(lt.head);
             return cons(r1, cons(r2, map(f, lt.tail)));
-        };
+        });
     }
 
     /**
@@ -436,11 +438,11 @@ namespace List {
             const r1 = f(i, l.head);
             return cons(r1, e);
         }
-        return () => {
+        return thunk(() => {
             const r1 = f(i, l.head);
             const r2 = f((i + 1) as int, lt.head);
             return cons(r1, cons(r2, rec_mapi((i + 2) as int, f, lt.tail)));
-        };
+        });
     }
 
     /**
@@ -459,7 +461,7 @@ namespace List {
         f: (x: a) => b,
     ): thunk<list<b>> | list<b> {
         if (is_empty(l)) return acc;
-        return () => rmap_f(cons(f(l.head), acc), l.tail, f);
+        return thunk(() => rmap_f(cons(f(l.head), acc), l.tail, f));
     }
 
     /**
@@ -478,11 +480,11 @@ namespace List {
         l: list<a>,
     ): thunk<list<b>> | list<b> {
         if (is_empty(l)) return empty<b>();
-        return () => {
+        return thunk(() => {
             const r = f(l.head);
             if (Option.is_none(r)) return filter_map(f, l.tail);
             return cons(Option.get(r), filter_map(f, l.tail));
-        };
+        });
     }
 
     /**
@@ -509,7 +511,7 @@ namespace List {
         xs: list<a>,
     ): thunk<list<b>> | list<b> {
         if (is_empty(ys)) return concat_map(f, xs);
-        return () => cons(ys.head, prepend_concat_map(ys.tail, f, xs));
+        return thunk(() => cons(ys.head, prepend_concat_map(ys.tail, f, xs)));
     }
 
     /**
@@ -547,7 +549,245 @@ namespace List {
     ): tuple<[acc, list<b>]> {
         if (is_empty(l_input)) return tuple(accu, rev(l_accu));
         const [x, y] = f(accu, l_input.head);
-        return fold_left_map_aux(x, cons(y, l_accu), l_input.tail, f);
+        return tramp(rec_fold_left_map_aux)(
+            x,
+            cons(y, l_accu),
+            l_input.tail,
+            f,
+        );
+    }
+    function rec_fold_left_map_aux<a, b, acc>(
+        accu: acc,
+        l_accu: list<b>,
+        l_input: list<a>,
+        f: (x: acc, y: a) => tuple<[acc, b]>,
+    ): thunk<tuple<[acc, list<b>]>> | tuple<[acc, list<b>]> {
+        if (is_empty(l_input)) return tuple(accu, rev(l_accu));
+        const [x, y] = f(accu, l_input.head);
+        return thunk(() =>
+            fold_left_map_aux(x, cons(y, l_accu), l_input.tail, f),
+        );
+    }
+
+    /**
+     * `fold_left(f, init, [b1; ...; bn])` is `f((... (f(f(init, b1), b2) ...), bn)`.
+     */
+    /*
+    Signature:
+    ```
+    val fold_left : ('acc -> 'a -> 'acc) -> 'acc -> 'a list -> 'acc
+    ```
+    Source:
+    ```ocaml
+    let rec fold_left f accu l =
+    match l with
+        [] -> accu
+    | a::l -> fold_left f (f accu a) l
+    ```
+    */
+    export function fold_left<a, acc>(
+        f: (x: acc, y: a) => acc,
+        accu: acc,
+        l: list<a>,
+    ): acc {
+        return tramp(fold_left_aux)(f, accu, l);
+    }
+    function fold_left_aux<a, acc>(
+        f: (x: acc, y: a) => acc,
+        accu: acc,
+        l: list<a>,
+    ): thunk<acc> | acc {
+        if (is_empty(l)) return accu;
+        return thunk(() => fold_left(f, f(accu, l.head), l.tail));
+    }
+
+    /**
+     * `fold_right(f, [a1; ...; an], init)` is `f(a1, (f(a2, (... (f(an,init) ...)))`.
+     */
+    export function fold_right<a, acc>(
+        f: (x: a, y: acc) => acc,
+        l: list<a>,
+        accu: acc,
+    ): acc {
+        return tramp(fold_right_aux)(f, l, accu);
+    }
+    function fold_right_aux<a, acc>(
+        f: (x: a, y: acc) => acc,
+        l: list<a>,
+        accu: acc,
+    ): thunk<acc> | acc {
+        if (is_empty(l)) return accu;
+        return thunk(() => f(l.head, fold_right(f, l.tail, accu)));
+    }
+
+    /**
+     * `iter2(f, l1, l2)` calls in turn `f(a1, b1)`, ..., `f(an, bn)`, where `l1`
+     * and `l2` are the same length.
+     * @throws {Invalid_argument} if the two lists are determined to have
+     * different lengths.
+     */
+    export function iter2<a, b>(
+        f: (x: a, y: b) => void,
+        l1: list<a>,
+        l2: list<b>,
+    ): void {
+        return tramp(iter2_aux)(f, l1, l2);
+    }
+    function iter2_aux<a, b>(
+        f: (x: a, y: b) => void,
+        l1: list<a>,
+        l2: list<b>,
+    ): thunk<void> | void {
+        if (is_empty(l1) && is_empty(l2)) return;
+        if (is_empty(l1) || is_empty(l2)) throw new Error("Invalid_argument");
+        return thunk(() => {
+            f(l1.head, l2.head);
+            iter2(f, l1.tail, l2.tail);
+        });
+    }
+
+    export function is_exactly_one<a>(l: list<a>): l is Cons<a> {
+        return length(l) === 1 && is_cons(l);
+    }
+
+    export function is_at_least_two<a>(l: list<a>): l is Cons2<a> {
+        return length(l) >= 2 && is_cons(l) && is_cons(l.tail);
+    }
+
+    /**
+     * `map2(f, l1, l2)` is `list(f(a1, b1), ..., f(an, bn))`.
+     * @throws {Invalid_argument} if the two lists are determined to have
+     * different lengths.
+     */
+    export function map2<a, b, c>(
+        f: (x: a, y: b) => c,
+        l1: list<a>,
+        l2: list<b>,
+    ): list<c> {
+        return tramp(map2_aux)(f, l1, l2);
+    }
+    function map2_aux<a, b, c>(
+        f: (x: a, y: b) => c,
+        l1: list<a>,
+        l2: list<b>,
+    ): thunk<list<c>> | list<c> {
+        switch (true) {
+            case is_empty(l1) && is_empty(l2):
+                return empty<c>();
+            case is_exactly_one(l1) && is_exactly_one(l2): {
+                const r1 = f(l1.head, l2.head);
+                return list(r1);
+            }
+            case is_at_least_two(l1) && is_at_least_two(l2): {
+                const r1 = f(l1.head, l2.head);
+                const r2 = f(l1.tail.head, l2.tail.head);
+                return thunk(() => {
+                    const r = map2(f, l1.tail.tail, l2.tail.tail);
+                    return cons(r1, cons(r2, r));
+                });
+            }
+            default:
+                throw new Invalid_argument("List.map2");
+        }
+    }
+
+    /**
+     * `rev_map2(f, l1, l2)` gives the same result as `List.rev(List.map2(f, l1,
+     * l2))`, but is more efficient.
+     */
+    export function rev_map2<a, b, c>(
+        f: (x: a, y: b) => c,
+        l1: list<a>,
+        l2: list<b>,
+    ): list<c> {
+        return rmap2_f(empty(), l1, l2, f);
+    }
+    function rmap2_f<a, b, c>(
+        acc: list<c>,
+        l1: list<a>,
+        l2: list<b>,
+        f: (x: a, y: b) => c,
+    ): list<c> {
+        return tramp(rmap2_f_aux)(acc, l1, l2, f);
+    }
+    function rmap2_f_aux<a, b, c>(
+        acc: list<c>,
+        l1: list<a>,
+        l2: list<b>,
+        f: (x: a, y: b) => c,
+    ): thunk<list<c>> | list<c> {
+        if (is_empty(l1) && is_empty(l2)) return acc;
+        if (is_cons(l1) && is_cons(l2)) {
+            const r = cons(f(l1.head, l2.head), acc);
+            return thunk(() => rmap2_f(r, l1.tail, l2.tail, f));
+        }
+        throw new Invalid_argument("List.rmap2_f");
+    }
+
+    /**
+     * `fold_left2(f, init, l1, l2)` is `f(...(f(f(init, a1), b1), ...), an, bn)`.
+     * @throws {Invalid_argument} if the two lists are determined to have
+     * different lengths.
+     */
+    export function fold_left2<a, b, acc>(
+        f: (x: acc, y: a, z: b) => acc,
+        accu: acc,
+        l1: list<a>,
+        l2: list<b>,
+    ): acc {
+        return tramp(fold_left2_aux)(f, accu, l1, l2);
+    }
+    function fold_left2_aux<a, b, acc>(
+        f: (x: acc, y: a, z: b) => acc,
+        accu: acc,
+        l1: list<a>,
+        l2: list<b>,
+    ): thunk<acc> | acc {
+        if (is_empty(l1) && is_empty(l2)) return accu;
+        if (is_cons(l1) && is_cons(l2)) {
+            return thunk(() => {
+                return fold_left2(
+                    f,
+                    f(accu, l1.head, l2.head),
+                    l1.tail,
+                    l2.tail,
+                );
+            });
+        }
+        throw new Invalid_argument("List.fold_left2");
+    }
+
+    /**
+     * `fold_right2(f, [a1; ...; an], [b1; ...; bn], init)` is `f(a1, b1, (f(a2,
+     * b2, ... (f(an, bn, init) ...)).
+     * @throws {Invalid_argument} if the two lists are determined to have
+     * different lengths. Not tail-recursive.
+     */
+    export function fold_right2<a, b, acc>(
+        f: (x: a, y: b, z: acc) => acc,
+        l1: list<a>,
+        l2: list<b>,
+        accu: acc,
+    ): acc {
+        return tramp(fold_right2_aux)(f, l1, l2, accu);
+    }
+    function fold_right2_aux<a, b, acc>(
+        f: (x: a, y: b, z: acc) => acc,
+        l1: list<a>,
+        l2: list<b>,
+        accu: acc,
+    ): thunk<acc> | acc {
+        if (is_empty(l1) && is_empty(l2)) return accu;
+        if (is_cons(l1) && is_cons(l2)) {
+            return thunk(() => {
+                return f(
+                    l1.head,
+                    l2.head,
+                    fold_right2(f, l1.tail, l2.tail, accu),
+                );
+            });
+        }
+        throw new Invalid_argument("List.fold_right2");
     }
 }
 
