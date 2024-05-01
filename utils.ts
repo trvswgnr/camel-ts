@@ -90,4 +90,6 @@ export type WidenLiteral<T> = T extends string
     ? symbol
     : T;
 
-export type NoInfer<A extends any> = [A][A extends any ? 0 : never];
+export type Identity<T> = {
+    [K in keyof T]: T[K];
+} & {};
