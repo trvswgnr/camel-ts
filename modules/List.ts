@@ -1,7 +1,8 @@
-import { tramp, type thunk, Thunk, type NoInfer } from "../utils";
+import { tramp, type thunk, Thunk } from "../utils";
 import { Failure, Invalid_argument } from "./Exceptions";
 import Int, { type int } from "./Int";
 import Option, { type option } from "./Option";
+import { tuple } from "./Tuple";
 
 export type list<a> = List.Empty | List.Cons<a>;
 
@@ -446,9 +447,9 @@ namespace List {
      * `rev_map(f, l)` gives the same result as `List.rev(List.map(f, l))`, but
      * is more efficient.
      */
-    export const rev_map = <a, b>(f: (x: a) => b, l: list<a>): list<b> => {
+    export function rev_map<a, b>(f: (x: a) => b, l: list<a>): list<b> {
         return rmap_f(empty<b>(), l, f);
-    };
+    }
     function rmap_f<a, b>(acc: list<b>, l: list<a>, f: (x: a) => b): list<b> {
         return tramp(rmap_f_aux)(acc, l, f);
     }
@@ -459,6 +460,94 @@ namespace List {
     ): thunk<list<b>> | list<b> {
         if (is_empty(l)) return acc;
         return () => rmap_f(cons(f(l.head), acc), l.tail, f);
+    }
+
+    /**
+     * `filter_map(f, l)` applies `f` to every element of `l`, filters out the
+     * `None` elements and returns the list of the arguments of the `Some`
+     * elements.
+     */
+    export function filter_map<a, b>(
+        f: (x: a) => option<b>,
+        l: list<a>,
+    ): list<b> {
+        return tramp(filter_map_aux)(f, l);
+    }
+    function filter_map_aux<a, b>(
+        f: (x: a) => option<b>,
+        l: list<a>,
+    ): thunk<list<b>> | list<b> {
+        if (is_empty(l)) return empty<b>();
+        return () => {
+            const r = f(l.head);
+            if (Option.is_none(r)) return filter_map(f, l.tail);
+            return cons(Option.get(r), filter_map(f, l.tail));
+        };
+    }
+
+    /**
+     * `concat_map(f, l)` gives the same result as `List.concat(List.map(f, l))`.
+     * Tail-recursive.
+     */
+    export function concat_map<a, b>(
+        f: (x: a) => list<b>,
+        l: list<a>,
+    ): list<b> {
+        if (is_empty(l)) return empty<b>();
+        return prepend_concat_map(f(l.head), f, l.tail);
+    }
+    function prepend_concat_map<a, b>(
+        ys: list<b>,
+        f: (x: a) => list<b>,
+        xs: list<a>,
+    ): list<b> {
+        return tramp(prepend_concat_map_aux)(ys, f, xs);
+    }
+    function prepend_concat_map_aux<a, b>(
+        ys: list<b>,
+        f: (x: a) => list<b>,
+        xs: list<a>,
+    ): thunk<list<b>> | list<b> {
+        if (is_empty(ys)) return concat_map(f, xs);
+        return () => cons(ys.head, prepend_concat_map(ys.tail, f, xs));
+    }
+
+    /**
+     * `fold_left_map(f, xs)` is a combination of `fold_left` and `map` that
+     * threads an accumulator through calls to `f`.
+     */
+    /*
+    Signature:
+    ```
+    val fold_left_map : ('acc -> 'a -> 'acc * 'b) -> 'acc -> 'a list -> 'acc * 'b list
+    ```
+    Source:
+    ```ocaml
+    let fold_left_map f accu l =
+        let rec aux accu l_accu = function
+            | [] -> accu, rev l_accu
+            | x :: l ->
+                let accu, x = f accu x in
+                aux accu (x :: l_accu) l in
+    aux accu [] l
+    ```
+    */
+    export function fold_left_map<a, b, acc>(
+        f: (x: acc, y: a) => tuple<acc, b>,
+        accu: acc,
+        l: list<a>,
+    ): tuple<acc, list<b>> {
+        return fold_left_map_aux(accu, empty(), l, f);
+    }
+    function fold_left_map_aux<a, b, acc>(
+        accu: acc,
+        l_accu: list<b>,
+        l_input: list<a>,
+        f: (x: acc, y: a) => tuple<acc, b>,
+    ): tuple<acc, list<b>> {
+        if (is_empty(l_input)) return tuple(accu, rev(l_accu));
+        const [x, y] = f(accu, l_input.head);
+        return fold_left_map_aux(x, cons(y, l_accu), l_input.tail, f);
     }
 }
 
