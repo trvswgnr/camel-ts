@@ -1,7 +1,7 @@
 import { Nominal } from "../utils";
 import { Invalid_argument, Not_implemented } from "./Exceptions";
 import type { float } from "./Float";
-import type { int } from "./Int";
+import { type int } from "./Int";
 
 export type char = Nominal<string, "char">;
 export const char = (s: string): char => {
