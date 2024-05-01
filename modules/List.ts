@@ -533,18 +533,18 @@ namespace List {
     ```
     */
     export function fold_left_map<a, b, acc>(
-        f: (x: acc, y: a) => tuple<acc, b>,
+        f: (x: acc, y: a) => tuple<[acc, b]>,
         accu: acc,
         l: list<a>,
-    ): tuple<acc, list<b>> {
+    ): tuple<[acc, list<b>]> {
         return fold_left_map_aux(accu, empty(), l, f);
     }
     function fold_left_map_aux<a, b, acc>(
         accu: acc,
         l_accu: list<b>,
         l_input: list<a>,
-        f: (x: acc, y: a) => tuple<acc, b>,
-    ): tuple<acc, list<b>> {
+        f: (x: acc, y: a) => tuple<[acc, b]>,
+    ): tuple<[acc, list<b>]> {
         if (is_empty(l_input)) return tuple(accu, rev(l_accu));
         const [x, y] = f(accu, l_input.head);
         return fold_left_map_aux(x, cons(y, l_accu), l_input.tail, f);
