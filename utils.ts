@@ -6,7 +6,8 @@ export function Nominal<T, Type>(v: T, t: Type): Nominal<T, typeof t> {
     return v as Nominal<T, typeof t>;
 }
 
-export type thunk<T> = () => T;
+export type thunk<T> = Nominal<() => T, "thunk">;
+export const thunk = <T>(f: () => T): thunk<T> => f as thunk<T>;
 export namespace Thunk {
     export function is_thunk<T>(v: T | thunk<T>): v is thunk<T> {
         return typeof v === "function" && v.length === 0;
