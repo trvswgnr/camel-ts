@@ -86,14 +86,14 @@ namespace List {
         l2: list<a>,
     ): number | thunk<number> {
         switch (true) {
-            case List.is_empty(l1) && List.is_empty(l2):
+            case is_empty(l1) && is_empty(l2):
                 return 0;
-            case List.is_empty(l1):
+            case is_empty(l1):
                 return -1;
-            case List.is_empty(l2):
+            case is_empty(l2):
                 return 1;
-            case List.is_cons(l1) && List.is_cons(l2):
-                return () => List.compare_lengths(l1.tail, l2.tail);
+            case is_cons(l1) && is_cons(l2):
+                return () => compare_lengths(l1.tail, l2.tail);
             default:
                 throw new Invalid_argument("List.compare_lengths");
         }
@@ -111,13 +111,13 @@ namespace List {
         l: list<a>,
         n: number,
     ): thunk<number> | number {
-        if (List.is_empty(l)) {
+        if (is_empty(l)) {
             if (n === 0) return 0;
             if (n > 0) return -1;
             return 1;
         }
         if (n <= 0) return 1;
-        return () => List.compare_length_with(l.tail, (n - 1) as int);
+        return () => compare_length_with(l.tail, (n - 1) as int);
     }
 
     /**
@@ -152,7 +152,7 @@ namespace List {
                 tail,
             } as list<a>;
         }
-        return (tail: list<a>) => List.cons(head, tail);
+        return (tail: list<a>) => cons(head, tail);
     }
 
     /**
@@ -160,7 +160,7 @@ namespace List {
      * @throws {Failure} if the list is empty.
      */
     export const hd = <a>(l: list<a>): a => {
-        if (List.is_empty(l)) throw new Failure("hd");
+        if (is_empty(l)) throw new Failure("hd");
         return l.head;
     };
 
@@ -169,7 +169,7 @@ namespace List {
      * @throws {Failure} if the list is empty.
      */
     export const tl = <a>(l: list<a>): list<a> => {
-        if (List.is_empty(l)) throw new Failure("tl");
+        if (is_empty(l)) throw new Failure("tl");
         return l.tail;
     };
 
@@ -187,7 +187,7 @@ namespace List {
         if (n < 0) throw new Invalid_argument("List.nth");
         if (l.t === Empty) throw new Failure("nth");
         if (n === 0) return l.head;
-        return () => List.nth(l.tail, (n - 1) as int);
+        return () => nth(l.tail, (n - 1) as int);
     }
 
     /**
@@ -206,21 +206,13 @@ namespace List {
         if (n < 0) throw new Invalid_argument("List.nth");
         if (l.t === Empty) return Option.none();
         if (n === 0) return Option.some(l.head);
-        return () => List.nth_opt(l.tail, (n - 1) as int);
+        return () => nth_opt(l.tail, (n - 1) as int);
     }
 
     /**
      * List reversal.
      */
-    export const rev = <a>(l: list<a>): list<a> => {
-        return tramp(rev_aux)(l, empty<a>());
-    };
-    function rev_aux<a>(l: list<a>, acc: list<a>): thunk<list<a>> | list<a> {
-        if (l.t === Empty) {
-            return acc;
-        }
-        return () => List.cons(l.head, List.append(l.tail, acc));
-    }
+    export const rev = <a>(l: list<a>): list<a> => rev_append(l, empty<a>());
 
     /**
      * `init len f` is [f 0; f 1; ...; f (len-1)], evaluated left to right.
@@ -243,8 +235,8 @@ namespace List {
         const r2 = f((i + 1) as int);
         return () => {
             const l1 = init_helper((i + 2) as int, last, f);
-            const l2 = List.cons(r2, l1);
-            return List.cons(r1, l2);
+            const l2 = cons(r2, l1);
+            return cons(r1, l2);
         };
     }
 
@@ -257,7 +249,7 @@ namespace List {
     };
     function of_js_array_aux<a>(arr: a[]): thunk<list<a>> | list<a> {
         if (arr.length === 0) return empty<a>();
-        return () => List.cons(arr[0]!, of_js_array(arr.slice(1)));
+        return () => cons(arr[0]!, of_js_array(arr.slice(1)));
     }
 
     /**
@@ -271,7 +263,7 @@ namespace List {
         if (l0.t === Empty) {
             return l1;
         }
-        return () => List.cons(l0.head, List.append(l0.tail, l1));
+        return () => cons(l0.head, append(l0.tail, l1));
     }
 
     /**
@@ -279,8 +271,15 @@ namespace List {
      * equivalent to `(List.rev l1) @ l2`.
      */
     export const rev_append = <a>(l1: list<a>, l2: list<a>): list<a> => {
-        return List.append(List.rev(l1), l2);
+        return tramp(rev_append_aux)(l1, l2);
     };
+    function rev_append_aux<a>(
+        l1: list<a>,
+        l2: list<a>,
+    ): thunk<list<a>> | list<a> {
+        if (is_empty(l1)) return l2;
+        return () => rev_append(l1.tail, cons(l1.head, l2));
+    }
 
     /**
      * Concatenate a list of lists. The elements of the argument are all
@@ -290,8 +289,8 @@ namespace List {
         return tramp(concat_aux)(l);
     };
     function concat_aux<a>(l: list<list<a>>): thunk<list<a>> | list<a> {
-        if (List.is_empty(l)) return empty<a>();
-        return () => List.append(List.hd(l), List.concat(List.tl(l)));
+        if (is_empty(l)) return empty<a>();
+        return () => append(hd(l), concat(tl(l)));
     }
     export const flatten = concat;
 
@@ -313,20 +312,57 @@ namespace List {
         l2: list<a>,
         eq: (a: a, b: a) => boolean,
     ): thunk<boolean> | boolean {
-        if (List.is_empty(l1) && List.is_empty(l2)) return true;
-        if (List.is_empty(l1) || List.is_empty(l2)) return false;
-        return () => eq(l1.head, l2.head) && List.equal(l1.tail, l2.tail, eq);
+        if (is_empty(l1) && is_empty(l2)) return true;
+        if (is_empty(l1) || is_empty(l2)) return false;
+        return () => eq(l1.head, l2.head) && equal(l1.tail, l2.tail, eq);
     }
 
     /**
-     * `compare cmp(l1, l2)` performs a lexicographic comparison of the two input
-     * lists, using the same 'a -> 'a -> int interface as compare:
-     * a1 :: l1 is smaller than a2 :: l2 (negative result) if a1 is smaller than
-     * a2, or if they are equal (0 result) and l1 is smaller than l2
-     * the empty list [] is strictly smaller than non-empty lists
-     * Note: the cmp function will be called even if the lists have different
+     * `compare(cmp, l1, l2)` performs a lexicographic comparison of the two
+     * input lists, using the same `(x: a, y: a) => int` interface as compare:
+     * `cons(a1, l1)` is smaller than `cons(a2, l2)` (negative result) if `a1`
+     * is smaller than `a2`, or if they are equal (0 result) and `l1` is smaller
+     * than `l2`. The empty list `[]` is strictly smaller than non-empty lists.
+     *
+     * @note the `cmp` function will be called even if the lists have different
      * lengths.
      */
+    export const compare = <a>(
+        cmp: (x: a, y: a) => int,
+        l1: list<a>,
+        l2: list<a>,
+    ): int => tramp(compare_aux)(cmp, l1, l2);
+    function compare_aux<a>(
+        cmp: (x: a, y: a) => int,
+        l1: list<a>,
+        l2: list<a>,
+    ): thunk<int> | int {
+        if (is_empty(l1) && is_empty(l2)) return Int.zero;
+        if (is_empty(l1)) return Int.minus_one;
+        if (is_empty(l2)) return Int.one;
+        return () => {
+            const c = cmp(l1.head, l2.head);
+            if (c !== Int.zero) return c;
+            return compare(cmp, l1.tail, l2.tail);
+        };
+    }
+
+    /* --- Iterators --- */
+
+    /**
+     * `iter(f, l)` applies function `f` in turn to all elements of the list
+     * `l`.
+     */
+    export const iter = <a>(f: (x: a) => void, l: list<a>): void => {
+        return tramp(iter_aux)(f, l);
+    };
+    function iter_aux<a>(f: (x: a) => void, l: list<a>): thunk<void> | void {
+        if (is_empty(l)) return;
+        return () => {
+            f(l.head);
+            iter(f, l.tail);
+        };
+    }
 }
 
 export function js_array_from_list<a>(l: list<a>): a[] {
