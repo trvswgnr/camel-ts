@@ -52,6 +52,22 @@ namespace List {
     };
 
     /**
+     * `is_exactly_one(l)` is true if and only if `l` has exactly one element.
+     * @note not part of OCaml's standard library
+     */
+    export function has_exactly_one<a>(l: list<a>): l is Cons<a> {
+        return length(l) === 1 && is_cons(l);
+    }
+
+    /**
+     * `is_at_least_two(l)` is true if and only if `l` has at least two elements.
+     * @note not part of OCaml's standard library
+     */
+    export function has_at_least_two<a>(l: list<a>): l is Cons2<a> {
+        return length(l) >= 2 && is_cons(l) && is_cons(l.tail);
+    }
+
+    /**
      * Match on a list.
      * @note not part of OCaml's standard library
      */
@@ -518,22 +534,6 @@ namespace List {
      * `fold_left_map(f, xs)` is a combination of `fold_left` and `map` that
      * threads an accumulator through calls to `f`.
      */
-    /*
-    Signature:
-    ```
-    val fold_left_map : ('acc -> 'a -> 'acc * 'b) -> 'acc -> 'a list -> 'acc * 'b list
-    ```
-    Source:
-    ```ocaml
-    let fold_left_map f accu l =
-        let rec aux accu l_accu = function
-            | [] -> accu, rev l_accu
-            | x :: l ->
-                let accu, x = f accu x in
-                aux accu (x :: l_accu) l in
-    aux accu [] l
-    ```
-    */
     export function fold_left_map<a, b, acc>(
         f: (x: acc, y: a) => tuple<[acc, b]>,
         accu: acc,
@@ -572,19 +572,6 @@ namespace List {
     /**
      * `fold_left(f, init, [b1; ...; bn])` is `f((... (f(f(init, b1), b2) ...), bn)`.
      */
-    /*
-    Signature:
-    ```
-    val fold_left : ('acc -> 'a -> 'acc) -> 'acc -> 'a list -> 'acc
-    ```
-    Source:
-    ```ocaml
-    let rec fold_left f accu l =
-    match l with
-        [] -> accu
-    | a::l -> fold_left f (f accu a) l
-    ```
-    */
     export function fold_left<a, acc>(
         f: (x: acc, y: a) => acc,
         accu: acc,
@@ -646,14 +633,6 @@ namespace List {
         });
     }
 
-    export function is_exactly_one<a>(l: list<a>): l is Cons<a> {
-        return length(l) === 1 && is_cons(l);
-    }
-
-    export function is_at_least_two<a>(l: list<a>): l is Cons2<a> {
-        return length(l) >= 2 && is_cons(l) && is_cons(l.tail);
-    }
-
     /**
      * `map2(f, l1, l2)` is `list(f(a1, b1), ..., f(an, bn))`.
      * @throws {Invalid_argument} if the two lists are determined to have
@@ -674,11 +653,11 @@ namespace List {
         switch (true) {
             case is_empty(l1) && is_empty(l2):
                 return empty<c>();
-            case is_exactly_one(l1) && is_exactly_one(l2): {
+            case has_exactly_one(l1) && has_exactly_one(l2): {
                 const r1 = f(l1.head, l2.head);
                 return list(r1);
             }
-            case is_at_least_two(l1) && is_at_least_two(l2): {
+            case has_at_least_two(l1) && has_at_least_two(l2): {
                 const r1 = f(l1.head, l2.head);
                 const r2 = f(l1.tail.head, l2.tail.head);
                 return thunk(() => {
