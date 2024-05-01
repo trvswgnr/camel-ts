@@ -363,6 +363,103 @@ namespace List {
             iter(f, l.tail);
         };
     }
+
+    /**
+     * Same as {@link List.iter `List.iter`}, but the function is applied to the
+     * index of the element as first argument (counting from 0), and the element
+     * itself as second argument.
+     */
+    export const iteri = <a>(f: (x: int, y: a) => void, l: list<a>): void => {
+        return rec_iteri(Int.zero, f, l);
+    };
+    function rec_iteri<a>(i: int, f: (x: int, y: a) => void, l: list<a>): void {
+        return tramp(rec_iteri_aux)(i, f, l);
+    }
+    function rec_iteri_aux<a>(
+        i: int,
+        f: (x: int, y: a) => void,
+        l: list<a>,
+    ): thunk<void> | void {
+        if (is_empty(l)) return;
+        return () => {
+            f(i, l.head);
+            rec_iteri((i + 1) as int, f, l.tail);
+        };
+    }
+
+    /**
+     * `map(f, l)` applies function `f` to all elements of the list `l` and
+     * builds a new list with the results returned by `f`.
+     */
+    export const map = <a, b>(f: (x: a) => b, l: list<a>): list<b> => {
+        return tramp(map_aux)(f, l);
+    };
+    function map_aux<a, b>(
+        f: (x: a) => b,
+        l: list<a>,
+    ): thunk<list<b>> | list<b> {
+        if (is_empty(l)) return empty<b>();
+        const lt = l.tail;
+        if (is_empty(lt)) return list(f(l.head));
+        return () => {
+            const r1 = f(l.head);
+            const r2 = f(lt.head);
+            return cons(r1, cons(r2, map(f, lt.tail)));
+        };
+    }
+
+    /**
+     * Same as {@link List.map `List.map`}, but the function is applied to the
+     * index of the element as first argument (counting from 0), and the element
+     * itself as second argument.
+     */
+    export function mapi<a, b>(f: (x: int, y: a) => b, l: list<a>): list<b> {
+        return rec_mapi(Int.zero, f, l);
+    }
+    function rec_mapi<a, b>(
+        i: int,
+        f: (x: int, y: a) => b,
+        l: list<a>,
+    ): list<b> {
+        return tramp(rec_mapi_aux)(i, f, l);
+    }
+    function rec_mapi_aux<a, b>(
+        i: int,
+        f: (x: int, y: a) => b,
+        l: list<a>,
+    ): thunk<list<b>> | list<b> {
+        const e = empty<b>();
+        if (is_empty(l)) return e;
+        const lt = l.tail;
+        if (is_empty(lt)) {
+            const r1 = f(i, l.head);
+            return cons(r1, e);
+        }
+        return () => {
+            const r1 = f(i, l.head);
+            const r2 = f((i + 1) as int, lt.head);
+            return cons(r1, cons(r2, rec_mapi((i + 2) as int, f, lt.tail)));
+        };
+    }
+
+    /**
+     * `rev_map(f, l)` gives the same result as `List.rev(List.map(f, l))`, but
+     * is more efficient.
+     */
+    export const rev_map = <a, b>(f: (x: a) => b, l: list<a>): list<b> => {
+        return rmap_f(empty<b>(), l, f);
+    };
+    function rmap_f<a, b>(acc: list<b>, l: list<a>, f: (x: a) => b): list<b> {
+        return tramp(rmap_f_aux)(acc, l, f);
+    }
+    function rmap_f_aux<a, b>(
+        acc: list<b>,
+        l: list<a>,
+        f: (x: a) => b,
+    ): thunk<list<b>> | list<b> {
+        if (is_empty(l)) return acc;
+        return () => rmap_f(cons(f(l.head), acc), l.tail, f);
+    }
 }
 
 export function js_array_from_list<a>(l: list<a>): a[] {
