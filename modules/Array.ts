@@ -2,8 +2,7 @@ import { Invalid_argument, Not_implemented } from "./Exceptions";
 import { Nominal } from "../utils";
 import Int, { type int } from "./Int";
 import Float, { type float } from "./Float";
-import type { list } from "./List";
-import list from "./List";
+import List, { type list } from "./List";
 import Option, { type option } from "./Option";
 
 class _array<T> {
@@ -154,7 +153,7 @@ namespace Array {
     export const concat = <T>(lists: list<t<T>>): t<T> => {
         const arr = make_empty_array<T>();
         for (let i = 0 as int; i < List.length(lists); i++) {
-            const a = List.get(lists, i);
+            const a = List.nth(lists, i);
             for (let j = 0 as int; j < length(a); j++) {
                 arr[(length(arr) + j) as int] = get(a, j);
             }
@@ -259,7 +258,7 @@ namespace Array {
     export const of_list = <T>(l: list<T>): t<T> => {
         const arr = make_empty_array<T>();
         for (let i = 0 as int; i < List.length(l); i++) {
-            arr[i] = List.get(l, i);
+            arr[i] = List.nth(l, i);
         }
         return arr;
     };
