@@ -1,4 +1,4 @@
-import { Invalid_argument, Not_implemented } from "./Exceptions";
+import { Invalid_argument } from "./Exceptions";
 import { Nominal } from "../utils";
 import Int, { type int } from "./Int";
 import Float, { type float } from "./Float";
@@ -11,7 +11,9 @@ class _array<T> {
 
 export type array<T> = Nominal<_array<T>, "array">;
 
-const make_empty_array = <T>(): array<T> => new _array<T>() as array<T>;
+function make_empty_array<T>(): array<T> {
+    return new _array<T>() as array<T>;
+}
 
 /**
  * Array operations.

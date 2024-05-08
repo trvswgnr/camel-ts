@@ -306,4 +306,17 @@ namespace Int {
     };
 }
 
+/**
+ * `fn_number_to_int(f)` converts a function that returns `number` to a function that returns `int`.
+ */
+export function fn_number_to_int<
+    A extends readonly any[],
+    R extends number | bigint,
+>(f: (...args: A) => R): (...args: A) => int<R> {
+    return (...args) => {
+        const result = f(...args);
+        return int(result);
+    };
+}
+
 export default Int;

@@ -189,4 +189,15 @@ namespace Option {
     }
 }
 
+export function fn_nullable_to_option<A extends readonly any[], R>(
+    f: (...args: A) => R,
+): (...args: A) => option<NonNullable<R>> {
+    return (...args) => {
+        const result = f(...args);
+        return result === null || result === undefined
+            ? Option.none()
+            : Option.some(result);
+    };
+}
+
 export default Option;

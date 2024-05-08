@@ -28,4 +28,13 @@ namespace Unit {
     export const to_string = (u: unit): "()" => "()";
 }
 
+export function fn_void_to_unit<A extends readonly any[], R>(
+    f: (...args: A) => R,
+): (...args: A) => unit {
+    return (...args) => {
+        f(...args);
+        return unit;
+    };
+}
+
 export default Unit;

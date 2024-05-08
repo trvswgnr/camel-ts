@@ -19,6 +19,9 @@ function failwith(s) {
       };
 }
 
+/**
+ * @returns {any}
+ */
 function invalid_arg(s) {
   throw {
         RE_EXN_ID: "Invalid_argument",
